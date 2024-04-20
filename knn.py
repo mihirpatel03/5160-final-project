@@ -95,7 +95,7 @@ class knn:
         return np.array(confusion_scores)
 
 
-    def get_training_data_predictions(self):
+    def store_predictions_as_vec(self):
         """
         Return an array that includes each training point's coordinates rounded to two decimals,
         true label, predicted label as integers, and confusion score rounded to two decimals.

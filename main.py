@@ -23,5 +23,6 @@ plotter = knn(n_neighbors=10)
 plotter.fit(X_train, y_train)
 plotter.predict()
 plotter.plot_decision_boundaries()
-input_data,predicted_label,confusion_score = plotter.get_training_data_predictions()
+input_data,predicted_label,confusion_score = plotter.store_predictions_as_vec()
+print(input_data)
 
