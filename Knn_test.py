@@ -8,26 +8,30 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
 class knn:
-    def __init__(self, n_neighbors):
+    def __init__(self, n_neighbors, X_train, X_test, y_train, y_test):
         self.n_neighbors = n_neighbors
         self.classifier = KNeighborsClassifier(n_neighbors=self.n_neighbors)
         self.radius_classifier = RadiusNeighborsClassifier(radius=0.75)
         self.cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
         self.cmap_bold = ['darkorange', 'c', 'darkblue']
-
-    def fit(self, X_train, y_train):
         self.X_train = X_train
+        self.X_test = X_test
         self.y_train = y_train
-        self.classifier.fit(X_train, y_train)
-        unique_classes = np.unique(y_train)
+        self.y_test = y_test
+
+    def fit(self):
+        self.classifier.fit(self.X_train, self.y_train)
+        unique_classes = np.unique(self.y_train)
         self.num_classes = len(unique_classes)
         self.cmap_light = ListedColormap(plt.cm.viridis(np.linspace(0, 1, self.num_classes)))
         self.cmap_bold = plt.cm.viridis(np.linspace(0, 1, self.num_classes))
 
-    def predict(self, X_test):
+        self.radius_classifier.fit(self.X_train, self.y_train)  # Fit the radius classifier
+
+    def predict(self,X_test):
         return self.classifier.predict(X_test)
 
-    def plot_decision_boundaries(self, X_test, y_test):
+    def plot_decision_boundaries(self):
         # Set up mesh grid
         h = 0.02  # step size in the mesh
         x_min, x_max = self.X_train[:, 0].min() - 1, self.X_train[:, 0].max() + 1
@@ -49,7 +53,7 @@ class knn:
                         legend=False, label='Training Data (Circle)', marker='o')
         
         # Plot the test points
-        sns.scatterplot(x=X_test[:, 0], y=X_test[:, 1], hue=y_test,
+        sns.scatterplot(x=self.X_test[:, 0], y=self.X_test[:, 1], hue=self.y_test,
                         palette=list(self.cmap_bold), alpha=0.6, edgecolor="black",
                         legend=False, label='Testing Data (X)', marker='X')
         
@@ -66,9 +70,9 @@ class knn:
         plt.ylabel("Feature 2")
         plt.show()
 
-    def evaluate(self, X_test, y_test):
-        y_pred = self.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
+    def evaluate(self):
+        y_pred = self.predict(self.X_test)
+        accuracy = accuracy_score(self.y_test, y_pred)
         print(f"Accuracy: {accuracy:.2f}")
         return accuracy
 
@@ -79,7 +83,7 @@ class knn:
         the total number of neighbors within a 1-unit radius.
         """
         # Retrieve the indices of neighbors for each training point within the specified radius (1 unit here).
-        neighbors = self.radius_classifier.radius_neighbors(self.X_train, return_distance=False)
+        neighbors = self.radius_classifier.radius_neighbors(self.X_test, return_distance=False)
 
         # Initialize an empty list to store the confusion scores for each training point.
         confusion_scores = []
@@ -111,10 +115,10 @@ class knn:
         true label, predicted label as integers, and confusion score rounded to two decimals.
         """
         # Calculate the confusion score using the custom method
-        confusion_scores = self.confusion_score()
+        confusion_scores = self.confusion_score(self.X_test)
 
         # Stack the training data points, true labels, predicted labels, and confusion scores
-        data = np.column_stack((self.X_train, self.y_train, self.train_predictions, confusion_scores))
+        data = np.column_stack((self.X_train, self.y_train, self.predict(X_test), confusion_scores))
 
         # Round coordinates and confusion scores to two decimal places
         data[:, [0, 1, -1]] = np.round(data[:, [0, 1, -1]], 2)
@@ -128,6 +132,10 @@ class knn:
 
 
         return input_data,predicted_label,confusion_score
+    
+    def epsilon(self):
+        epsilon = self.evaluate()
+        return epsilon
 
 
 # Create your dataset
@@ -136,11 +144,17 @@ X, y = make_classification(n_features=2, n_redundant=0, n_informative=2,
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 # Initialize and train classifier
-classifier = knn(n_neighbors=6)
-classifier.fit(X_train, y_train)
+classifier = knn(n_neighbors=6,X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
+classifier.fit()
 
 # Plot decision boundaries using training data
-classifier.plot_decision_boundaries(X_test, y_test)
+classifier.plot_decision_boundaries()
 
 # Evaluate classifier on test data
-classifier.evaluate(X_test, y_test)
+classifier.evaluate()
+
+# # get prediction vectors
+# input_data,predicted_label,confusion_score = classifier.store_predictions_as_vec(X_test)
+# print(input_data)
+
+classifier.epsilon()

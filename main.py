@@ -28,4 +28,3 @@ plotter.predict()
 plotter.plot_decision_boundaries()
 input_data,predicted_label,confusion_score = plotter.store_predictions_as_vec()
 print(input_data)
-
