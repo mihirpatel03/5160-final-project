@@ -1,13 +1,10 @@
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 from matplotlib.colors import ListedColormap
+import seaborn as sns
 from sklearn import datasets
 from sklearn.neighbors import KNeighborsClassifier,RadiusNeighborsClassifier
 
-import numpy as np
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 
 
