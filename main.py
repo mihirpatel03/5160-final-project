@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from knn import knn
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
         plotter.fit(X_train, y_train)
         plotter.predict()
         plotter.plot_decision_boundaries()
-        input_data,predicted_label,confusion_score = plotter.store_predictions_as_vec()
+        input_data,predicted_label,confusion_score = plotter.get_training_data_predictions()
         actual_label = input_data[:,-1]
         k_pred_arr.append(get_pred_accuracy(actual_label,predicted_label))
         print(i)
