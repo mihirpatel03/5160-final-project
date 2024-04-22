@@ -26,7 +26,7 @@ def main():
         plotter.fit(X_train, y_train)
         plotter.predict()
         plotter.plot_decision_boundaries()
-        input_data,predicted_label,confusion_score = plotter.get_training_data_predictions()
+        input_data,predicted_label,confusion_score = plotter.store_predictions_as_vec()
         actual_label = input_data[:,-1]
         k_pred_arr.append(get_pred_accuracy(actual_label,predicted_label))
         print(i)
