@@ -1,63 +1,82 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn import datasets
-from sklearn.neighbors import KNeighborsClassifier,RadiusNeighborsClassifier
-
-
-
+from matplotlib.colors import ListedColormap
+from sklearn.neighbors import KNeighborsClassifier, RadiusNeighborsClassifier
+from sklearn.datasets import make_classification
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 class knn:
-    def __init__(self, n_neighbors):
-        """
-        Initialize the KNN classifier with n_neighbors.
-        """
+    def __init__(self, n_neighbors, X_train, X_test, y_train, y_test):
         self.n_neighbors = n_neighbors
         self.classifier = KNeighborsClassifier(n_neighbors=self.n_neighbors)
+        self.radius_classifier = RadiusNeighborsClassifier(radius=0.75)
         self.cmap_light = ListedColormap(['orange', 'cyan', 'cornflowerblue'])
         self.cmap_bold = ['darkorange', 'c', 'darkblue']
-
-        # radius for confusion score
-        self.radius_classifier = RadiusNeighborsClassifier(radius=0.75)  # Classifier to compute confusion score
-
-
-    def fit(self, X_train, y_train):
-        """
-        Fit the KNN classifier on the training data.
-        """
         self.X_train = X_train
+        self.X_test = X_test
         self.y_train = y_train
-        self.classifier.fit(X_train, y_train)
-        self.train_predictions = self.classifier.predict(X_train)  # Predictions on the training data
+        self.y_test = y_test
+        self.bet,self.eps = 0,0
 
-        self.radius_classifier.fit(X_train, y_train)  # Fit the radius classifier
-
-        # Dynamically create color maps based on the number of unique classes
-        unique_classes = np.unique(y_train)
+    def fit(self):
+        self.classifier.fit(self.X_train, self.y_train)
+        unique_classes = np.unique(self.y_train)
         self.num_classes = len(unique_classes)
         self.cmap_light = ListedColormap(plt.cm.viridis(np.linspace(0, 1, self.num_classes)))
         self.cmap_bold = plt.cm.viridis(np.linspace(0, 1, self.num_classes))
 
+        self.radius_classifier.fit(self.X_train, self.y_train)  # Fit the radius classifier
 
-    def predict(self):
-        """
-        Predict using the trained classifier over a mesh grid.
-        """
+    def predict(self,X_test):
+        return self.classifier.predict(X_test)
 
-        # Mesh 2d space into grid to generate X_test and y_test
-
+    def plot_decision_boundaries(self):
+        # Set up mesh grid
         h = 0.02  # step size in the mesh
         x_min, x_max = self.X_train[:, 0].min() - 1, self.X_train[:, 0].max() + 1
         y_min, y_max = self.X_train[:, 1].min() - 1, self.X_train[:, 1].max() + 1
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                             np.arange(y_min, y_max, h))
-        X_test = np.c_[xx.ravel(), yy.ravel()]
-
+                            np.arange(y_min, y_max, h))
+        
         # Predict the function value over the grid
-        y_test = self.classifier.predict(X_test)
-        self.xx, self.yy = xx, yy
-        self.y_test = y_test.reshape(xx.shape)
+        Z = self.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = Z.reshape(xx.shape)
+        
+        # Start plotting
+        plt.figure(figsize=(8, 6))
+        plt.contourf(xx, yy, Z, cmap=self.cmap_light)
+        
+        # Plot the training points
+        sns.scatterplot(x=self.X_train[:, 0], y=self.X_train[:, 1], hue=self.y_train,
+                        palette=list(self.cmap_bold), alpha=1.0, edgecolor="black",
+                        legend=False, label='Training Data (Circle)', marker='o')
+        
+        # Plot the test points
+        sns.scatterplot(x=self.X_test[:, 0], y=self.X_test[:, 1], hue=self.y_test,
+                        palette=list(self.cmap_bold), alpha=0.6, edgecolor="black",
+                        legend=False, label='Testing Data (X)', marker='X')
+        
+        # Customize legend
+        handles, labels = plt.gca().get_legend_handles_labels()
+        labels = [f"Training Data (Circle)" if 'Circle' in label else f"Testing Data (X)" for label in labels]
+        plt.legend(handles, labels, title="Data Type")
+        
+        # Add plot limits and titles
+        plt.xlim(xx.min(), xx.max())
+        plt.ylim(yy.min(), yy.max())
+        plt.title(f"{self.num_classes}-Class classification (k = {self.n_neighbors})")
+        plt.xlabel("Feature 1")
+        plt.ylabel("Feature 2")
+        plt.show()
+
+    def evaluate(self):
+        y_pred = self.predict(self.X_test)
+        accuracy = accuracy_score(self.y_test, y_pred)
+        print(f"Accuracy: {accuracy:.2f}")
+        return accuracy
+
 
     def confusion_score(self):
         """
@@ -65,7 +84,7 @@ class knn:
         the total number of neighbors within a 1-unit radius.
         """
         # Retrieve the indices of neighbors for each training point within the specified radius (1 unit here).
-        neighbors = self.radius_classifier.radius_neighbors(self.X_train, return_distance=False)
+        neighbors = self.radius_classifier.radius_neighbors(self.X_test, return_distance=False)
 
         # Initialize an empty list to store the confusion scores for each training point.
         confusion_scores = []
@@ -91,17 +110,16 @@ class knn:
         # Convert the list of confusion scores to a numpy array and return it.
         return np.array(confusion_scores)
 
-
     def store_predictions_as_vec(self):
         """
         Return an array that includes each training point's coordinates rounded to two decimals,
         true label, predicted label as integers, and confusion score rounded to two decimals.
         """
         # Calculate the confusion score using the custom method
-        confusion_scores = self.confusion_score()
+        confusion_scores = self.confusion_score(self.X_test)
 
         # Stack the training data points, true labels, predicted labels, and confusion scores
-        data = np.column_stack((self.X_train, self.y_train, self.train_predictions, confusion_scores))
+        data = np.column_stack((self.X_train, self.y_train, self.predict(self.X_test), confusion_scores))
 
         # Round coordinates and confusion scores to two decimal places
         data[:, [0, 1, -1]] = np.round(data[:, [0, 1, -1]], 2)
@@ -115,22 +133,12 @@ class knn:
 
 
         return input_data,predicted_label,confusion_score
-
-
-    def plot_decision_boundaries(self):
-        """
-        Plot the decision boundaries and training points.
-        """
-        plt.figure(figsize=(8, 6))
-        plt.contourf(self.xx, self.yy, self.y_test, cmap=self.cmap_light)
-
-        # Plot the training points
-        sns.scatterplot(x=self.X_train[:, 0], y=self.X_train[:, 1],
-                        hue=self.y_train, palette=list(self.cmap_bold),
-                        alpha=1.0, edgecolor="black", legend=None)  # Removed legend for clarity
-        plt.xlim(self.xx.min(), self.xx.max())
-        plt.ylim(self.yy.min(), self.yy.max())
-        plt.title(f"{self.num_classes}-Class classification (k = {self.n_neighbors})")
-        plt.xlabel("Feature 1")
-        plt.ylabel("Feature 2")
-        plt.show()
+    
+    def epsilon(self):
+        self.eps = self.evaluate()
+    
+    def beta(self):
+        #self.bet = (np.log((1-self.eps)/self.eps))/2
+        if self.eps == 0 or self.eps==1:
+            return 1
+        self.bet = ((1-self.eps)/self.eps)
