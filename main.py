@@ -36,7 +36,7 @@ def main():
             if model_pred<=0:
                 model_pred = -1
             
-            pred_sum+=model_pred*np.e**(-plotter_arr[j].bet)
+            pred_sum+=model_pred*(plotter_arr[j].bet)
 
         pred=0
         if pred_sum>0:

@@ -141,4 +141,5 @@ class knn:
         #self.bet = (np.log((1-self.eps)/self.eps))/2
         if self.eps == 0 or self.eps==1:
             return 1
-        self.bet = ((1-self.eps)/self.eps)
+        # self.bet = ((1-self.eps)/self.eps)
+        self.bet = abs(self.eps-.5)*2
