@@ -21,7 +21,7 @@ class knn:
         self.bet,self.eps = 0,0
 
     def fit(self):
-        self.classifier.fit(self.X_train, self.y_train)
+        self.classifier.fit(self.X_train, self.y_train,)
         unique_classes = np.unique(self.y_train)
         self.num_classes = len(unique_classes)
         self.cmap_light = ListedColormap(plt.cm.viridis(np.linspace(0, 1, self.num_classes)))
@@ -29,8 +29,8 @@ class knn:
 
         self.radius_classifier.fit(self.X_train, self.y_train)  # Fit the radius classifier
 
-    def predict(self,X_test):
-        return self.classifier.predict(X_test)
+    def predict(self):
+        return self.classifier.predict(self.X_test)
 
     def plot_decision_boundaries(self):
         # Set up mesh grid
