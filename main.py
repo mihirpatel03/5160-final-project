@@ -6,16 +6,18 @@ from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from knn import knn
 from feature_subsampling import feature_subsampling
+import knn_pca as kp
 
 def main():
     # Generate a random dataset
-    n_features = 100
+    n_features = 1000
+    n_neighbors = 5
     X, y = make_classification(n_features = n_features, n_redundant=0, n_informative=10,
                                n_clusters_per_class=1, n_samples=200, random_state=42, n_classes=2)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Non-Bagging
-    knn_model = knn(n_neighbors=5, X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
+    knn_model = knn(n_neighbors=n_neighbors, X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
     knn_model.fit()
     knn_model_accuracy = knn_model.evaluate()
 
@@ -30,15 +32,22 @@ def main():
     subset_X_train = X_train[:,ig_fl]
     subset_X_test = X_test[:,ig_fl]
     #create a knn model with these features
-    fs_knn = knn(n_neighbors=5, X_train=subset_X_train, X_test=subset_X_test, y_train=y_train, y_test=y_test)
+    fs_knn = knn(n_neighbors=n_neighbors, X_train=subset_X_train, X_test=subset_X_test, y_train=y_train, y_test=y_test)
     fs_knn.fit()
     #get accuracy
     fs_knn_accuracy = fs_knn.evaluate()
+
+    # pca
+    X_train_pca,X_test_pca = kp.knn_pca(int(np.sqrt(n_features)),X_train, X_test, y_train, y_test)
+    knn_pca = knn(n_neighbors=n_neighbors, X_train=X_train_pca, X_test=X_test_pca, y_train=y_train, y_test=y_test)
+    knn_pca.fit()
+    knn_pca_accuracy = knn_model.evaluate()
 
     # Comparing results
     print(f"\nSingle KNN Accuracy: {knn_model_accuracy:.2f}")
     print(f"Bagged KNN Accuracy: {bagged_knn_accuracy:.2f}")
     print(f"Feature-Selected KNN Accuracy: {fs_knn_accuracy:.2f}")
+    print(f"PCA KNN Accuracy: {knn_pca_accuracy:.2f}")
 
 
 
