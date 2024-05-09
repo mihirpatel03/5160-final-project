@@ -76,40 +76,7 @@ class knn:
         accuracy = accuracy_score(self.y_test, y_pred)
         print(f"Accuracy: {accuracy:.2f}")
         return accuracy
-
-
-    def confusion_score(self):
-        """
-        Calculate the confusion score for each point as the number of unique classes divided by
-        the total number of neighbors within a 1-unit radius.
-        """
-        # Retrieve the indices of neighbors for each training point within the specified radius (1 unit here).
-        neighbors = self.radius_classifier.radius_neighbors(self.X_test, return_distance=False)
-
-        # Initialize an empty list to store the confusion scores for each training point.
-        confusion_scores = []
-
-        # Iterate through each set of neighbor indices (neigh_indices) for each training point.
-        for idx, neigh_indices in enumerate(neighbors):
-            # Check if there are any neighbors within the radius.
-            if neigh_indices.size > 0:
-                # Retrieve the class labels of the neighbors.
-                classes = self.y_train[neigh_indices]
-                # Count the number of unique class labels among the neighbors.
-                unique_classes_count = np.unique(classes).size
-                # Get the total number of neighbors.
-                total_neighbors = classes.size
-                # Calculate the confusion score: number of unique classes divided by total neighbors.
-                score = unique_classes_count / total_neighbors
-            else:
-                # If no neighbors are found within the radius, assign a confusion score of 0.
-                score = 0
-            # Append the calculated score to the list of confusion scores.
-            confusion_scores.append(score)
-
-        # Convert the list of confusion scores to a numpy array and return it.
-        return np.array(confusion_scores)
-
+    
     def store_predictions_as_vec(self):
         """
         Return an array that includes each training point's coordinates rounded to two decimals,
@@ -133,13 +100,3 @@ class knn:
 
 
         return input_data,predicted_label,confusion_score
-    
-    def epsilon(self):
-        self.eps = self.evaluate()
-    
-    def beta(self):
-        #self.bet = (np.log((1-self.eps)/self.eps))/2
-        if self.eps == 0 or self.eps==1:
-            return 1
-        # self.bet = ((1-self.eps)/self.eps)
-        self.bet = abs(self.eps-.5)*2
