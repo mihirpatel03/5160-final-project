@@ -22,7 +22,7 @@ def main():
     knn_model_accuracy = knn_model.evaluate()
 
     # Bagging KNN
-    bagged_knn = feature_subsampling(n_features,20,X_train, X_test, y_train, y_test)
+    bagged_knn = feature_subsampling(n_features,500,X_train, X_test, y_train, y_test)
     bagged_knn_accuracy = bagged_knn.bagged_predictions()
 
     #Info Gain
