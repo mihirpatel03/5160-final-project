@@ -29,8 +29,8 @@ class knn:
 
         self.radius_classifier.fit(self.X_train, self.y_train)  # Fit the radius classifier
 
-    def predict(self):
-        return self.classifier.predict(self.X_test)
+    def predict(self, test_list):
+        return self.classifier.predict(test_list)
 
     def plot_decision_boundaries(self):
         # Set up mesh grid
@@ -74,7 +74,6 @@ class knn:
     def evaluate(self):
         y_pred = self.predict(self.X_test)
         accuracy = accuracy_score(self.y_test, y_pred)
-        print(f"Accuracy: {accuracy:.2f}")
         return accuracy
     
     def store_predictions_as_vec(self):
