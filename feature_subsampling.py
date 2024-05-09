@@ -35,6 +35,12 @@ class feature_subsampling:
     #     model.fit()
     #     vector = model.predict()
 
+    def run_knn(self):
+        model = knn(self.num_of_neighbors,self.X_train,self.X_test,self.y_train,self.y_test)
+        model.fit()
+        vector = model.predict()
+        acc = round(np.sum((self.y.test == vector)/len(vector)),2)
+
     def bagged_predictions(self):
         pred_array = np.zeros((self.n_bags,self.X_test.shape[0]))
         for i in range(self.n_bags):
@@ -50,4 +56,5 @@ class feature_subsampling:
 
 model = feature_subsampling(50,20)
 model.create_data()
+model.run_knn()
 model.bagged_predictions()
