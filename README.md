@@ -1,8 +1,3 @@
 # 5160-final-project
 
-1 Code kNN. Probably as a class? k is an attribute of that class. (this could probably be done just using sklearn's package, however...) need to add functionality that each sample's vector contains its features+label+confusion score, or maybe there is a separate list, indexed by point IDs, and each value is that point's confusion score. This might be easier to just add on rather than modifying the point vector.
-2 Add functionality for a helper function that computes confusion score (and then we can modify this helper function's contents as we go)
-3 Review AdaBoost and include that -- read the paper I texted to you and maybe we should decide what the multiple models we are looking over are (i.e. are we just increasing k). You should be able to include the entire boosting process, the only difference is how we are calculating epsilon
-4 So maybe also have a helper function that will compute epsilon (using our new definition). That is, iterate over the list of test points and count the number of incorrectly classified examples, weighting up or down based on confusion score -- the weighting is done both example-by-example and model-by-model. We might also have to re-define beta.
-5 Probably set up a test suite that compares kNN to our entire new process, so that we can get results comparing the two. Might also be helpful to compare this method to an intermediate "average the return of k 1-10" method to see that the confusion score/boosting is actually doing something.
-6 This also means we need to find some sort of datasets to do all of this on.
+The program runs in the driver file main.py. From there we create a random dataset and pass it to three different kNN models, comparing their results. Basic kNN is in knn.py. The bagged kNN is in feature_subsampling.py. And the Info-Gain/Feature Selection kNN is in info_gain.py. 

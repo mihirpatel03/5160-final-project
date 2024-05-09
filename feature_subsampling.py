@@ -6,15 +6,20 @@ import numpy as np
 class feature_subsampling:
 
     def __init__(self, n_features, n_bags, X_train, X_test, y_train, y_test):
-        self.n_features = n_features
-        self.n_features_subsetted = round(np.sqrt(self.n_features))
-        self.n_bags = n_bags
+        self.n_features = n_features #number of features
+        self.n_features_subsetted = round(np.sqrt(self.n_features)) #num features in each abg
+        self.n_bags = n_bags #number of bags we want to do 
+
+        #data
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
+
+        #subsets that we will assign during each bag
         self.X_train_subset = 0
         self.X_test_subset = 0
+        #number neighbors, vector of predictions
         self.num_of_neighbors = 5
         self.vector = 0
 
