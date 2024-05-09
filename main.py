@@ -12,7 +12,7 @@ def main():
     # Generate a random dataset
     n_features = 1000
     n_neighbors = 5
-    X, y = make_classification(n_features = n_features, n_redundant=0, n_informative=10,
+    X, y = make_classification(n_features = n_features, n_redundant=0, n_informative=600,
                                n_clusters_per_class=1, n_samples=200, random_state=42, n_classes=2)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
@@ -49,8 +49,37 @@ def main():
     print(f"Feature-Selected KNN Accuracy: {fs_knn_accuracy:.2f}")
     print(f"PCA KNN Accuracy: {knn_pca_accuracy:.2f}")
 
+    return knn_model_accuracy, bagged_knn_accuracy, fs_knn_accuracy, knn_pca_accuracy
 
+
+def plot(epochs):
+    epochs_list = []
+    knn_model_accuracy = []
+    bagged_knn_accuracy = []
+    fs_knn_accuracy = []
+    knn_pca_accuracy = []
+    for i in range(epochs):
+        knn_model_accuracy_output, bagged_knn_accuracy_output, fs_knn_accuracy_output, knn_pca_accuracy_output = main()
+        knn_model_accuracy.append(knn_model_accuracy_output)
+        bagged_knn_accuracy.append(bagged_knn_accuracy_output)
+        fs_knn_accuracy.append(fs_knn_accuracy_output)
+        knn_pca_accuracy.append(knn_pca_accuracy_output)
+        epochs_list.append(i)
+
+    plt.figure(figsize=(10, 5))  # Set the figure size
+    plt.plot(epochs_list, knn_model_accuracy, linestyle='--', color='black', label='KNN Model Accuracy')
+    plt.plot(epochs_list, bagged_knn_accuracy, linestyle='-', color='blue', label='Bagged KNN Accuracy')
+    plt.plot(epochs_list, fs_knn_accuracy, linestyle='-', color='blue', label='Information Gain KNN Accuracy')
+    plt.plot(epochs_list, knn_pca_accuracy, linestyle='-', color='blue', label='PCA-Based Dimension Reduction KNN Accuracy')
+    plt.title('Accuracy Comparison: KNN vs. Bagged KNN')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.legend(loc='lower right')
+    plt.xticks(epochs_list)
+
+    plt.show()
 
 if __name__ == "__main__":
+    plot(10)
     main()
-
