@@ -39,7 +39,8 @@ class feature_subsampling:
         model = knn(self.num_of_neighbors,self.X_train,self.X_test,self.y_train,self.y_test)
         model.fit()
         vector = model.predict()
-        acc = round(np.sum((self.y.test == vector)/len(vector)),2)
+        acc = round(np.sum((self.y_test == vector)/len(vector)),2)
+        print(f"knn accuracy = {acc}")
 
     def bagged_predictions(self):
         pred_array = np.zeros((self.n_bags,self.X_test.shape[0]))
@@ -51,8 +52,9 @@ class feature_subsampling:
             model.fit()
             vector = model.predict()
             pred_array[i] = vector
+            print(f"bag {i} accuracy = {round(np.sum((self.y_test == vector)/len(vector)),2)}")
         bagged_predictions = np.average(pred_array, axis = 0).round(decimals = 0)
-        print(f"accuracy = {np.sum(self.y_test == bagged_predictions)/len(bagged_predictions)}")
+        print(f"bagged accuracy = {np.sum(self.y_test == bagged_predictions)/len(bagged_predictions)}")
 
 model = feature_subsampling(50,20)
 model.create_data()
