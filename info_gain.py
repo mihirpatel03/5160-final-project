@@ -28,7 +28,8 @@ def best_feature_list(ig_dict):
     ig_vals = sorted(list(ig_dict.values()), reverse=True)
 
     best_feature_list = []
-    num_to_select = int(len(ig_vals)** 0.5) #want to select sqrt(d) features
+    
+    num_to_select = len(ig_vals)//2 #want to select sqrt(d) features
 
     for i in range(num_to_select):
         #find the values in our inverted dict for this info gain number (i.e. a list of feature names)
@@ -39,5 +40,17 @@ def best_feature_list(ig_dict):
             feature_list.pop()
         else:
             best_feature_list.append(feature_list[0])
+
+
+    # for i in range(len(ig_vals)):
+    #     #find the values in our inverted dict for this info gain number (i.e. a list of feature names)
+    #     if ig_vals[i]>.001:
+    #         feature_list = inverted_dict[ig_vals[i]]
+    #         if len(feature_list)>1:
+    #             #if there are multiple, take one and remove it
+    #             best_feature_list.append(feature_list[-1])
+    #             feature_list.pop()
+    #         else:
+    #             best_feature_list.append(feature_list[0])
 
     return best_feature_list

@@ -16,10 +16,11 @@ def main():
     #plot_inf_features_to_accuracy(num_features = 50)
 
     ##this one creates the plot of bag size out of 50 vs accuracy
-    plot_bag_size_to_accuracy(num_features = 50)
+    #plot_bag_size_to_accuracy(num_features = 50)
 
     #this one plots the accuracy of each different method as number of features increases
-    # plot_numfeature_to_accuracy()
+    fix_num_informative = True #set to true if you want to fix the number of informative features at 20, else it will increase at 1/2 of num_features
+    plot_numfeature_to_accuracy(fix_num_informative)
 
 
 
@@ -64,8 +65,7 @@ def plot_inf_features_to_accuracy(num_features):
     plt.ylim(0, 1)
 
     plt.savefig("figures/increasing_informative.pdf", format='pdf')
-
-    
+ 
 def plot_bag_size_to_accuracy(num_features):
     features_list = []
     knn_model_accuracy_list = []
@@ -111,7 +111,8 @@ def plot_bag_size_to_accuracy(num_features):
     plt.savefig("figures/increasing_bag_size.pdf", format='pdf')
 
 
-def plot_numfeature_to_accuracy():
+
+def plot_numfeature_to_accuracy(fix_num_inf):
     features_list = []
     knn_model_accuracy_list = []
     bagged_knn_accuracy_list = []
@@ -121,7 +122,10 @@ def plot_numfeature_to_accuracy():
     for i in range(20,500,20):
         print(i)
         n_features = i
-        n_informative = 10
+        if fix_num_inf:
+            n_informative = 10
+        else:
+            n_informative = n_features//2
         n_neighbors = 3
         n_clusters_per = 1
 
@@ -139,14 +143,29 @@ def plot_numfeature_to_accuracy():
     plt.plot(features_list, fs_knn_accuracy_list, linestyle='dotted', color='red', label='Information Gain KNN Accuracy')
     plt.plot(features_list, knn_pca_accuracy_list, linestyle='dotted', color='green', label='PCA-Based Dimension Reduction KNN Accuracy')
     plt.plot(features_list, bagged_knn_accuracy_list, linestyle='dotted', color='orange', label='Bagged KNN Accuracy')
-    plt.title('Accuracy Comparisons Across Number of Features')
-    plt.xlabel('Number of Features')
-    plt.ylabel('Accuracy')
-    plt.grid(True)
-    plt.legend(loc='lower right')
-    plt.ylim(0, 1)
 
-    plt.savefig("figures/fixed_inform.pdf", format='pdf')
+    if fix_num_inf: #if we are fixing the number of informative features at 10
+        plt.title('Accuracy Comparisons Across Number of Features (with Fixed Number of Informative Features)')
+        plt.xlabel('Number of Features')
+        plt.ylabel('Accuracy')
+        plt.grid(True)
+        plt.legend(loc='lower right')
+        plt.ylim(0, 1)
+
+        plt.show()
+        #plt.savefig("figures/fixed_inform_percent.pdf", format='pdf')
+
+
+    else: #if the number of informative features increases along with total number of features
+        plt.title('Accuracy Comparisons Across Number of Features (with Increasing Number of Informative Features)')
+        plt.xlabel('Number of Features')
+        plt.ylabel('Accuracy')
+        plt.grid(True)
+        plt.legend(loc='lower right')
+        plt.ylim(0, 1)
+
+        plt.show()
+        #plt.savefig("figures/increasing_inform.pdf", format='pdf')
 
 
 def compute_accuracies(n_features, n_neighbors, n_informative,n_clusters_per):
@@ -161,8 +180,8 @@ def compute_accuracies(n_features, n_neighbors, n_informative,n_clusters_per):
     knn_model_accuracy = knn_model.evaluate()
 
     # Bagging KNN
-    number_bags = 100
-    bagged_knn = feature_subsampling(n_features,number_bags,X_train, X_test, y_train, y_test)
+    number_bags = 50
+    bagged_knn = feature_subsampling(n_features,number_bags,n_features//2,X_train, X_test, y_train, y_test)
     bagged_knn_accuracy = bagged_knn.bagged_predictions()
 
     #Info Gain
@@ -182,12 +201,6 @@ def compute_accuracies(n_features, n_neighbors, n_informative,n_clusters_per):
     knn_pca = knn(n_neighbors=n_neighbors, X_train=X_train_pca, X_test=X_test_pca, y_train=y_train, y_test=y_test)
     knn_pca.fit()
     knn_pca_accuracy = knn_pca.evaluate()
-
-    # Comparing results
-    # print(f"\nSingle KNN Accuracy: {knn_model_accuracy:.2f}")
-    # print(f"Bagged KNN Accuracy: {bagged_knn_accuracy:.2f}")
-    # print(f"Feature-Selected KNN Accuracy: {fs_knn_accuracy:.2f}")
-    # print(f"PCA KNN Accuracy: {knn_pca_accuracy:.2f}")
 
     return knn_model_accuracy, bagged_knn_accuracy, fs_knn_accuracy, knn_pca_accuracy
 
