@@ -7,7 +7,8 @@ class feature_subsampling:
 
     def __init__(self, n_features, n_bags, X_train, X_test, y_train, y_test):
         self.n_features = n_features #number of features
-        self.n_features_subsetted = round(np.sqrt(self.n_features)) #num features in each abg
+        #self.n_features_subsetted = round(np.sqrt(self.n_features)) #num features in each abg
+        self.n_features_subsetted = self.n_features//2#num features in each abg
         self.n_bags = n_bags #number of bags we want to do 
 
         #data
@@ -20,7 +21,7 @@ class feature_subsampling:
         self.X_train_subset = 0
         self.X_test_subset = 0
         #number neighbors, vector of predictions
-        self.num_of_neighbors = 5
+        self.num_of_neighbors = 3
         self.vector = 0
 
     def bagged_predictions(self):

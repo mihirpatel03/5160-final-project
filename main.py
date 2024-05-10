@@ -8,12 +8,115 @@ from knn import knn
 from feature_subsampling import feature_subsampling
 import knn_pca as kp
 
+
+
 def main():
+
+
+    plot_inf_features_to_accuracy(num_features = 50)
+    # plot_bag_size_to_accuracy()
+
+    # plot_numfeature_to_accuracy()
+
+
+
+
+    
+
+
+
+def plot_inf_features_to_accuracy(num_features):
+
+    features_list = []
+    knn_model_accuracy_list = []
+    bagged_knn_accuracy_list = []
+
+    for i in range(1,num_features):
+        print(i)
+        n_neighbors = 3
+        n_clusters_per = 1
+
+        X, y = make_classification(n_features = num_features, n_redundant=0, n_informative=i,
+                                n_clusters_per_class=n_clusters_per, n_samples=200, random_state=42, n_classes=2)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+        # Non-Bagging
+        knn_model = knn(n_neighbors=n_neighbors, X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
+        knn_model.fit()
+        knn_model_accuracy = knn_model.evaluate()
+
+        # Bagging KNN
+        number_bags = 50
+        bagged_knn = feature_subsampling(num_features,number_bags,X_train, X_test, y_train, y_test)
+        bagged_knn_accuracy = bagged_knn.bagged_predictions()
+        
+        features_list.append(i)
+        knn_model_accuracy_list.append(knn_model_accuracy)
+        bagged_knn_accuracy_list.append(bagged_knn_accuracy)
+
+    
+    plt.figure(figsize=(10, 5))  # Set the figure size
+    plt.plot(features_list, knn_model_accuracy_list, linestyle='dashed', color='blue', label='KNN Model Accuracy')
+    plt.plot(features_list, bagged_knn_accuracy_list, linestyle='dotted', color='orange', label='Bagged KNN Accuracy')
+    plt.title('Accuracy Comparisons Across Number of Informative Features out of 50')
+    plt.xlabel('Number of Informative Features out of 50')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.legend(loc='lower right')
+    plt.ylim(0, 1)
+
+    plt.savefig("figures/increasing_informative.pdf", format='pdf')
+
+    
+
+        
+    
+def plot_bag_size_to_accuracy():
+    pass
+
+
+def plot_numfeature_to_accuracy():
+    features_list = []
+    knn_model_accuracy_list = []
+    bagged_knn_accuracy_list = []
+    fs_knn_accuracy_list = []
+    knn_pca_accuracy_list = []
+
+    for i in range(20,500,20):
+        print(i)
+        n_features = i
+        n_informative = 10
+        n_neighbors = 3
+        n_clusters_per = 1
+
+        knn_model_accuracy, bagged_knn_accuracy, fs_knn_accuracy, knn_pca_accuracy = compute_accuracies(n_features, n_neighbors, n_informative, n_clusters_per)
+        
+        features_list.append(i)
+        knn_model_accuracy_list.append(knn_model_accuracy)
+        bagged_knn_accuracy_list.append(bagged_knn_accuracy)
+        fs_knn_accuracy_list.append(fs_knn_accuracy)
+        knn_pca_accuracy_list.append(knn_pca_accuracy)
+
+
+    plt.figure(figsize=(10, 5))  # Set the figure size
+    plt.plot(features_list, knn_model_accuracy_list, linestyle='dashed', color='black', label='KNN Model Accuracy')
+    plt.plot(features_list, fs_knn_accuracy_list, linestyle='dotted', color='red', label='Information Gain KNN Accuracy')
+    plt.plot(features_list, knn_pca_accuracy_list, linestyle='dotted', color='green', label='PCA-Based Dimension Reduction KNN Accuracy')
+    plt.plot(features_list, bagged_knn_accuracy_list, linestyle='dotted', color='orange', label='Bagged KNN Accuracy')
+    plt.title('Accuracy Comparisons Across Number of Features')
+    plt.xlabel('Number of Features')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.legend(loc='lower right')
+    plt.ylim(0, 1)
+
+    plt.savefig("figures/fixed_inform.pdf", format='pdf')
+
+
+def compute_accuracies(n_features, n_neighbors, n_informative,n_clusters_per):
     # Generate a random dataset
-    n_features = 10
-    n_neighbors = 5
-    X, y = make_classification(n_features = n_features, n_redundant=0, n_informative=10,
-                               n_clusters_per_class=1, n_samples=200, random_state=42, n_classes=2)
+    X, y = make_classification(n_features = n_features, n_redundant=0, n_informative=n_informative,
+                               n_clusters_per_class=n_clusters_per, n_samples=200, random_state=42, n_classes=2)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Non-Bagging
@@ -22,7 +125,8 @@ def main():
     knn_model_accuracy = knn_model.evaluate()
 
     # Bagging KNN
-    bagged_knn = feature_subsampling(n_features,500,X_train, X_test, y_train, y_test)
+    number_bags = 100
+    bagged_knn = feature_subsampling(n_features,number_bags,X_train, X_test, y_train, y_test)
     bagged_knn_accuracy = bagged_knn.bagged_predictions()
 
     #Info Gain
@@ -44,62 +148,13 @@ def main():
     knn_pca_accuracy = knn_pca.evaluate()
 
     # Comparing results
-    print(f"\nSingle KNN Accuracy: {knn_model_accuracy:.2f}")
-    print(f"Bagged KNN Accuracy: {bagged_knn_accuracy:.2f}")
-    print(f"Feature-Selected KNN Accuracy: {fs_knn_accuracy:.2f}")
-    print(f"PCA KNN Accuracy: {knn_pca_accuracy:.2f}")
+    # print(f"\nSingle KNN Accuracy: {knn_model_accuracy:.2f}")
+    # print(f"Bagged KNN Accuracy: {bagged_knn_accuracy:.2f}")
+    # print(f"Feature-Selected KNN Accuracy: {fs_knn_accuracy:.2f}")
+    # print(f"PCA KNN Accuracy: {knn_pca_accuracy:.2f}")
 
     return knn_model_accuracy, bagged_knn_accuracy, fs_knn_accuracy, knn_pca_accuracy
 
-
-def plot_bagging(epochs):
-    epochs_list = []
-    knn_model_accuracy = []
-    bagged_knn_accuracy = []
-    fs_knn_accuracy = []
-    knn_pca_accuracy = []
-    for i in range(epochs):
-        knn_model_accuracy_output, bagged_knn_accuracy_output, fs_knn_accuracy_output, knn_pca_accuracy_output = main()
-        knn_model_accuracy.append(knn_model_accuracy_output)
-        bagged_knn_accuracy.append(bagged_knn_accuracy_output)
-        fs_knn_accuracy.append(fs_knn_accuracy_output)
-        knn_pca_accuracy.append(knn_pca_accuracy_output)
-        epochs_list.append(i)
-
-    plt.figure(figsize=(10, 5))  # Set the figure size
-    plt.plot(epochs_list, knn_model_accuracy, linestyle='dashed', color='black', label='KNN Model Accuracy')
-    plt.plot(epochs_list, bagged_knn_accuracy, linestyle='dotted', color='blue', label='Bagged KNN Accuracy')
-    # plt.plot(epochs_list, fs_knn_accuracy, linestyle='dotted', color='red', label='Information Gain KNN Accuracy')
-    # plt.plot(epochs_list, knn_pca_accuracy, linestyle='dotted', color='green', label='PCA-Based Dimension Reduction KNN Accuracy')
-    plt.title('Accuracy Comparisons (1000 Features, 600 Informative Features, k=5)')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.grid(True)
-    plt.legend(loc='lower right')
-    plt.ylim(0, 1)
-    plt.xticks(epochs_list)
-
-    plt.show()
-
-# 1000 features
-n_features_list = [5,10,20,50,100,200]
-knn_model_accuracy = [0.85,0.78,0.75,0.75,0.52,0.6]
-fs_knn_accuracy = [0.88,0.82,0.88,0.77,0.7,0.85]
-knn_pca_accuracy = [0.67,0.55,0.68,0.62,0.45,0.4]
-
-
-plt.figure(figsize=(10, 5))  # Set the figure size
-plt.plot(n_features_list, knn_model_accuracy, linestyle='dashed', color='black', label='KNN Model Accuracy')
-plt.plot(n_features_list, fs_knn_accuracy, linestyle='dotted', color='red', label='Information Gain KNN Accuracy')
-plt.plot(n_features_list, knn_pca_accuracy, linestyle='dotted', color='green', label='PCA-Based Dimension Reduction KNN Accuracy')
-plt.title('Accuracy Comparisons Across Number of Features')
-plt.xlabel('Number of Features')
-plt.ylabel('Accuracy')
-plt.grid(True)
-plt.legend(loc='lower right')
-plt.ylim(0, 1)
-
-plt.show()
 
 if __name__ == "__main__":
     main()
