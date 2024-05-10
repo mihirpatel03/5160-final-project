@@ -5,10 +5,9 @@ import numpy as np
 
 class feature_subsampling:
 
-    def __init__(self, n_features, n_bags, X_train, X_test, y_train, y_test):
+    def __init__(self, n_features, n_bags, bag_size, X_train, X_test, y_train, y_test, ):
         self.n_features = n_features #number of features
-        #self.n_features_subsetted = round(np.sqrt(self.n_features)) #num features in each abg
-        self.n_features_subsetted = self.n_features//2#num features in each abg
+        self.n_features_subsetted = bag_size#num features in each bag
         self.n_bags = n_bags #number of bags we want to do 
 
         #data

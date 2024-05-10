@@ -12,21 +12,19 @@ import knn_pca as kp
 
 def main():
 
+    ##this one creates the plot of number of informative features out of 50 vs accuracy
+    #plot_inf_features_to_accuracy(num_features = 50)
 
-    plot_inf_features_to_accuracy(num_features = 50)
-    # plot_bag_size_to_accuracy()
+    ##this one creates the plot of bag size out of 50 vs accuracy
+    plot_bag_size_to_accuracy(num_features = 50)
 
+    #this one plots the accuracy of each different method as number of features increases
     # plot_numfeature_to_accuracy()
 
 
 
 
-    
-
-
-
 def plot_inf_features_to_accuracy(num_features):
-
     features_list = []
     knn_model_accuracy_list = []
     bagged_knn_accuracy_list = []
@@ -47,7 +45,7 @@ def plot_inf_features_to_accuracy(num_features):
 
         # Bagging KNN
         number_bags = 50
-        bagged_knn = feature_subsampling(num_features,number_bags,X_train, X_test, y_train, y_test)
+        bagged_knn = feature_subsampling(num_features,number_bags,num_features/2,X_train, X_test, y_train, y_test)
         bagged_knn_accuracy = bagged_knn.bagged_predictions()
         
         features_list.append(i)
@@ -68,11 +66,49 @@ def plot_inf_features_to_accuracy(num_features):
     plt.savefig("figures/increasing_informative.pdf", format='pdf')
 
     
+def plot_bag_size_to_accuracy(num_features):
+    features_list = []
+    knn_model_accuracy_list = []
+    bagged_knn_accuracy_list = []
 
+    for i in range(1,num_features):
+        print(i)
+        n_neighbors = 3
+        bag_size = i
+        n_clusters_per = 1
+        n_informative = 10
+
+        X, y = make_classification(n_features = num_features, n_redundant=0, n_informative=n_informative,
+                                n_clusters_per_class=n_clusters_per, n_samples=200, random_state=42, n_classes=2)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+        # Non-Bagging
+        knn_model = knn(n_neighbors=n_neighbors, X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
+        knn_model.fit()
+        knn_model_accuracy = knn_model.evaluate()
+
+        # Bagging KNN
+        number_bags = 50
+        bagged_knn = feature_subsampling(num_features,number_bags,bag_size,X_train, X_test, y_train, y_test)
+        bagged_knn_accuracy = bagged_knn.bagged_predictions()
         
+        features_list.append(i)
+        knn_model_accuracy_list.append(knn_model_accuracy)
+        bagged_knn_accuracy_list.append(bagged_knn_accuracy)
+
     
-def plot_bag_size_to_accuracy():
-    pass
+    plt.figure(figsize=(10, 5))  # Set the figure size
+    plt.plot(features_list, knn_model_accuracy_list, linestyle='dashed', color='blue', label='KNN Model Accuracy')
+    plt.plot(features_list, bagged_knn_accuracy_list, linestyle='dotted', color='orange', label='Bagged KNN Accuracy')
+    plt.title('Accuracy Comparisons Across Number of Features Subsampled per Bag')
+    plt.xlabel('Number of Features Subsampled per Bag')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.legend(loc='lower right')
+    plt.ylim(0, 1)
+
+    #plt.show()
+    plt.savefig("figures/increasing_bag_size.pdf", format='pdf')
 
 
 def plot_numfeature_to_accuracy():
